@@ -69,6 +69,152 @@ const (
 	keyKubeExecEnv               = "kube_exec_env"
 )
 
+// Helper functions for configuration building
+
+// parseJSONArray parses a JSON string into a string slice
+func parseJSONArray(value string) ([]string, error) {
+	var result []string
+	if err := json.Unmarshal([]byte(value), &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// parseJSONMap parses a JSON string into a string map
+func parseJSONMap(value string) (map[string]string, error) {
+	var result map[string]string
+	if err := json.Unmarshal([]byte(value), &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// setStringValue sets a string value in config if the credential exists
+func setStringValue(config map[string]any, configKey, credKey string, creds map[string]string) {
+	if v, ok := creds[credKey]; ok {
+		config[configKey] = v
+	}
+}
+
+// setBoolValue sets a boolean value in config if the credential exists
+func setBoolValue(config map[string]any, configKey, credKey string, creds map[string]string) {
+	if v, ok := creds[credKey]; ok {
+		config[configKey] = v == "true"
+	}
+}
+
+// setJSONArrayValue sets a JSON array value in config if the credential exists and is valid JSON
+func setJSONArrayValue(config map[string]any, configKey, credKey string, creds map[string]string) {
+	if v, ok := creds[credKey]; ok {
+		if arr, err := parseJSONArray(v); err == nil {
+			config[configKey] = arr
+		}
+	}
+}
+
+// setJSONMapValue sets a JSON map value in config if the credential exists and is valid JSON
+func setJSONMapValue(config map[string]any, configKey, credKey string, creds map[string]string) {
+	if v, ok := creds[credKey]; ok {
+		if m, err := parseJSONMap(v); err == nil {
+			config[configKey] = m
+		}
+	}
+}
+
+// buildGitConfig builds the Git configuration section
+func buildGitConfig(creds map[string]string) map[string]any {
+	gitConfig := map[string]any{}
+
+	// Basic Git settings
+	setStringValue(gitConfig, "url", keyGitURL, creds)
+	setStringValue(gitConfig, "branch", keyGitBranch, creds)
+	setStringValue(gitConfig, "author_name", keyGitAuthorName, creds)
+	setStringValue(gitConfig, "author_email", keyGitAuthorEmail, creds)
+	setStringValue(gitConfig, "commit_message_appendix", keyGitCommitMessageAppendix, creds)
+	setStringValue(gitConfig, "gpg_key_id", keyGitGPGKeyID, creds)
+	setStringValue(gitConfig, "gpg_key_ring", keyGitGPGKeyRing, creds)
+	setStringValue(gitConfig, "gpg_passphrase", keyGitGPGPassphrase, creds)
+
+	// HTTP authentication
+	httpConfig := buildHTTPConfig(creds)
+	if len(httpConfig) > 0 {
+		gitConfig["http"] = httpConfig
+	}
+
+	// SSH authentication
+	sshConfig := buildSSHConfig(creds)
+	if len(sshConfig) > 0 {
+		gitConfig["ssh"] = sshConfig
+	}
+
+	return gitConfig
+}
+
+// buildHTTPConfig builds the HTTP authentication configuration
+func buildHTTPConfig(creds map[string]string) map[string]any {
+	httpConfig := map[string]any{}
+
+	setStringValue(httpConfig, "username", keyGitHTTPUsername, creds)
+	setStringValue(httpConfig, "password", keyGitHTTPPassword, creds)
+	setBoolValue(httpConfig, "allow_insecure_http", keyGitHTTPAllowInsecure, creds)
+	setStringValue(httpConfig, "certificate_authority", keyGitHTTPCertificateAuthority, creds)
+
+	return httpConfig
+}
+
+// buildSSHConfig builds the SSH authentication configuration
+func buildSSHConfig(creds map[string]string) map[string]any {
+	sshConfig := map[string]any{}
+
+	setStringValue(sshConfig, "username", keyGitSSHUsername, creds)
+	setStringValue(sshConfig, "private_key", keyGitSSHPrivateKey, creds)
+	setStringValue(sshConfig, "password", keyGitSSHPassword, creds)
+	setJSONArrayValue(sshConfig, "hostkey_algos", keyGitSSHHostkeyAlgos, creds)
+
+	return sshConfig
+}
+
+// buildKubernetesConfig builds the Kubernetes configuration section
+func buildKubernetesConfig(creds map[string]string) map[string]any {
+	kubeConfig := map[string]any{}
+
+	// Basic Kubernetes settings
+	setStringValue(kubeConfig, "host", keyKubeHost, creds)
+	setStringValue(kubeConfig, "username", keyKubeUsername, creds)
+	setStringValue(kubeConfig, "password", keyKubePassword, creds)
+	setBoolValue(kubeConfig, "insecure", keyKubeInsecure, creds)
+	setStringValue(kubeConfig, "client_certificate", keyKubeClientCertificate, creds)
+	setStringValue(kubeConfig, "client_key", keyKubeClientKey, creds)
+	setStringValue(kubeConfig, "cluster_ca_certificate", keyKubeClusterCACertificate, creds)
+	setStringValue(kubeConfig, "config_path", keyKubeConfigPath, creds)
+	setJSONArrayValue(kubeConfig, "config_paths", keyKubeConfigPaths, creds)
+	setStringValue(kubeConfig, "config_context", keyKubeConfigContext, creds)
+	setStringValue(kubeConfig, "config_context_auth_info", keyKubeConfigContextAuthInfo, creds)
+	setStringValue(kubeConfig, "config_context_cluster", keyKubeConfigContextCluster, creds)
+	setStringValue(kubeConfig, "token", keyKubeToken, creds)
+	setStringValue(kubeConfig, "proxy_url", keyKubeProxyURL, creds)
+
+	// Exec authentication
+	execConfig := buildExecConfig(creds)
+	if len(execConfig) > 0 {
+		kubeConfig["exec"] = execConfig
+	}
+
+	return kubeConfig
+}
+
+// buildExecConfig builds the Kubernetes exec authentication configuration
+func buildExecConfig(creds map[string]string) map[string]any {
+	execConfig := map[string]any{}
+
+	setStringValue(execConfig, "api_version", keyKubeExecAPIVersion, creds)
+	setStringValue(execConfig, "command", keyKubeExecCommand, creds)
+	setJSONArrayValue(execConfig, "args", keyKubeExecArgs, creds)
+	setJSONMapValue(execConfig, "env", keyKubeExecEnv, creds)
+
+	return execConfig
+}
+
 // TerraformSetupBuilder builds Terraform a terraform.SetupFn function which
 // returns Terraform provider setup configuration
 func TerraformSetupBuilder(version, providerSource, providerVersion string) terraform.SetupFn {
@@ -85,6 +231,7 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		if configRef == nil {
 			return ps, errors.New(errNoProviderConfig)
 		}
+
 		pc := &v1beta1.ProviderConfig{}
 		if err := client.Get(ctx, types.NamespacedName{Name: configRef.Name}, pc); err != nil {
 			return ps, errors.Wrap(err, errGetProviderConfig)
@@ -99,161 +246,22 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		if err != nil {
 			return ps, errors.Wrap(err, errExtractCredentials)
 		}
+
 		creds := map[string]string{}
 		if err := json.Unmarshal(data, &creds); err != nil {
 			return ps, errors.Wrap(err, errUnmarshalCredentials)
 		}
 
-		// Set provider configuration
+		// Build provider configuration
 		ps.Configuration = map[string]any{}
 
 		// Configure Git settings
-		gitConfig := map[string]any{}
-		if v, ok := creds[keyGitURL]; ok {
-			gitConfig["url"] = v
-		}
-		if v, ok := creds[keyGitBranch]; ok {
-			gitConfig["branch"] = v
-		}
-		if v, ok := creds[keyGitAuthorName]; ok {
-			gitConfig["author_name"] = v
-		}
-		if v, ok := creds[keyGitAuthorEmail]; ok {
-			gitConfig["author_email"] = v
-		}
-		if v, ok := creds[keyGitCommitMessageAppendix]; ok {
-			gitConfig["commit_message_appendix"] = v
-		}
-		if v, ok := creds[keyGitGPGKeyID]; ok {
-			gitConfig["gpg_key_id"] = v
-		}
-		if v, ok := creds[keyGitGPGKeyRing]; ok {
-			gitConfig["gpg_key_ring"] = v
-		}
-		if v, ok := creds[keyGitGPGPassphrase]; ok {
-			gitConfig["gpg_passphrase"] = v
-		}
-
-		// Configure Git HTTP authentication
-		httpConfig := map[string]any{}
-		if v, ok := creds[keyGitHTTPUsername]; ok {
-			httpConfig["username"] = v
-		}
-		if v, ok := creds[keyGitHTTPPassword]; ok {
-			httpConfig["password"] = v
-		}
-		if v, ok := creds[keyGitHTTPAllowInsecure]; ok {
-			httpConfig["allow_insecure_http"] = v == "true"
-		}
-		if v, ok := creds[keyGitHTTPCertificateAuthority]; ok {
-			httpConfig["certificate_authority"] = v
-		}
-		if len(httpConfig) > 0 {
-			gitConfig["http"] = httpConfig
-		}
-
-		// Configure Git SSH authentication
-		sshConfig := map[string]any{}
-		if v, ok := creds[keyGitSSHUsername]; ok {
-			sshConfig["username"] = v
-		}
-		if v, ok := creds[keyGitSSHPrivateKey]; ok {
-			sshConfig["private_key"] = v
-		}
-		if v, ok := creds[keyGitSSHPassword]; ok {
-			sshConfig["password"] = v
-		}
-		if v, ok := creds[keyGitSSHHostkeyAlgos]; ok {
-			// Parse comma-separated list
-			var algos []string
-			if err := json.Unmarshal([]byte(v), &algos); err == nil {
-				sshConfig["hostkey_algos"] = algos
-			}
-		}
-		if len(sshConfig) > 0 {
-			gitConfig["ssh"] = sshConfig
-		}
-
-		if len(gitConfig) > 0 {
+		if gitConfig := buildGitConfig(creds); len(gitConfig) > 0 {
 			ps.Configuration["git"] = gitConfig
 		}
 
 		// Configure Kubernetes settings
-		kubeConfig := map[string]any{}
-		if v, ok := creds[keyKubeHost]; ok {
-			kubeConfig["host"] = v
-		}
-		if v, ok := creds[keyKubeUsername]; ok {
-			kubeConfig["username"] = v
-		}
-		if v, ok := creds[keyKubePassword]; ok {
-			kubeConfig["password"] = v
-		}
-		if v, ok := creds[keyKubeInsecure]; ok {
-			kubeConfig["insecure"] = v == "true"
-		}
-		if v, ok := creds[keyKubeClientCertificate]; ok {
-			kubeConfig["client_certificate"] = v
-		}
-		if v, ok := creds[keyKubeClientKey]; ok {
-			kubeConfig["client_key"] = v
-		}
-		if v, ok := creds[keyKubeClusterCACertificate]; ok {
-			kubeConfig["cluster_ca_certificate"] = v
-		}
-		if v, ok := creds[keyKubeConfigPath]; ok {
-			kubeConfig["config_path"] = v
-		}
-		if v, ok := creds[keyKubeConfigPaths]; ok {
-			// Parse comma-separated list
-			var paths []string
-			if err := json.Unmarshal([]byte(v), &paths); err == nil {
-				kubeConfig["config_paths"] = paths
-			}
-		}
-		if v, ok := creds[keyKubeConfigContext]; ok {
-			kubeConfig["config_context"] = v
-		}
-		if v, ok := creds[keyKubeConfigContextAuthInfo]; ok {
-			kubeConfig["config_context_auth_info"] = v
-		}
-		if v, ok := creds[keyKubeConfigContextCluster]; ok {
-			kubeConfig["config_context_cluster"] = v
-		}
-		if v, ok := creds[keyKubeToken]; ok {
-			kubeConfig["token"] = v
-		}
-		if v, ok := creds[keyKubeProxyURL]; ok {
-			kubeConfig["proxy_url"] = v
-		}
-
-		// Configure Kubernetes exec authentication
-		execConfig := map[string]any{}
-		if v, ok := creds[keyKubeExecAPIVersion]; ok {
-			execConfig["api_version"] = v
-		}
-		if v, ok := creds[keyKubeExecCommand]; ok {
-			execConfig["command"] = v
-		}
-		if v, ok := creds[keyKubeExecArgs]; ok {
-			// Parse comma-separated list
-			var args []string
-			if err := json.Unmarshal([]byte(v), &args); err == nil {
-				execConfig["args"] = args
-			}
-		}
-		if v, ok := creds[keyKubeExecEnv]; ok {
-			// Parse JSON map
-			var env map[string]string
-			if err := json.Unmarshal([]byte(v), &env); err == nil {
-				execConfig["env"] = env
-			}
-		}
-		if len(execConfig) > 0 {
-			kubeConfig["exec"] = execConfig
-		}
-
-		if len(kubeConfig) > 0 {
+		if kubeConfig := buildKubernetesConfig(creds); len(kubeConfig) > 0 {
 			ps.Configuration["kubernetes"] = kubeConfig
 		}
 
