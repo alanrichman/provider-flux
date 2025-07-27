@@ -13,7 +13,7 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "template.upbound.io"
+	Group   = "flux.flux.crossplane.io"
 	Version = "v1alpha1"
 )
 
