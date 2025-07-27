@@ -1,0 +1,42 @@
+apiVersion: bootstrap.flux.crossplane.io/v1alpha1
+kind: Git
+metadata:
+  name: flux-bootstrap-example
+spec:
+  forProvider:
+    # Git repository URL (required)
+    # This should be set via the ProviderConfig credentials
+    
+    # Optional: Path relative to the repository root
+    path: "clusters/my-cluster"
+    
+    # Optional: Flux version
+    version: "v2.6.4"
+    
+    # Optional: Namespace for Flux components
+    namespace: "flux-system"
+    
+    # Optional: Components to install
+    components:
+      - "source-controller"
+      - "kustomize-controller"
+      - "helm-controller"
+      - "notification-controller"
+    
+    # Optional: Watch all namespaces
+    watchAllNamespaces: true
+    
+    # Optional: Network policy
+    networkPolicy: true
+    
+    # Optional: Log level
+    logLevel: "info"
+    
+    # Optional: Interval for reconciliation
+    interval: "1m0s"
+    
+    # Optional: Delete git manifests on destroy
+    deleteGitManifests: true
+    
+  providerConfigRef:
+    name: default

@@ -1,40 +1,39 @@
-name: hashicorp/null
+name: fluxcd/flux
 resources:
-    null_resource:
+    flux_bootstrap_git Resource - terraform-provider-flux:
         subCategory: ""
-        description: The null_resource resource implements the standard resource lifecycle but takes no further action. On Terraform 1.4 and later, use the terraform_data resource type https://developer.hashicorp.com/terraform/language/resources/terraform-data instead. The triggers argument allows specifying an arbitrary set of values that, when changed, will cause the resource to be replaced.
-        name: null_resource
-        title: null_resource Resource - terraform-provider-null
-        examples:
-            - name: cluster
-              manifest: |-
-                {
-                  "connection": [
-                    {
-                      "host": "${element(aws_instance.cluster[*].public_ip, 0)}"
-                    }
-                  ],
-                  "provisioner": {
-                    "remote-exec": [
-                      {
-                        "inline": [
-                          "bootstrap-cluster.sh ${join(\" \",\n      aws_instance.cluster[*].private_ip)}"
-                        ]
-                      }
-                    ]
-                  },
-                  "triggers": {
-                    "cluster_instance_ids": "${join(\",\", aws_instance.cluster[*].id)}"
-                  }
-                }
-              dependencies:
-                aws_instance.cluster: |-
-                    {
-                      "ami": "ami-0dcc1e21636832c5d",
-                      "count": 3,
-                      "instance_type": "m5.large"
-                    }
+        description: Commits Flux components to a Git repository and configures a Kubernetes cluster to synchronize with the same Git repository.
+        name: flux_bootstrap_git Resource - terraform-provider-flux
+        title: flux_bootstrap_git Resource - terraform-provider-flux
         argumentDocs:
-            id: (String) This is set to a random value at create time.
-            triggers: (Map of String) A map of arbitrary strings that, when changed, will force the null resource to be replaced, re-running any associated provisioners.
-        importStatements: []
+            cluster_domain: (String) The internal cluster domain. Defaults to cluster.local
+            components: (Set of String) Toolkit components to include in the install manifests. Defaults to [source-controller kustomize-controller helm-controller notification-controller]
+            components_extra: (Set of String) List of extra components to include in the install manifests.
+            create: (String) A string that can be parsed as a duration consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+            delete: (String) A string that can be parsed as a duration consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+            delete_git_manifests: (Boolean) Delete manifests from git repository. Defaults to true.
+            disable_secret_creation: (Boolean) Use the existing secret for flux controller and don't create one from bootstrap
+            embedded_manifests: (Boolean) When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com. Defaults to false.
+            id: (String) The ID of this resource.
+            image_pull_secret: (String) Kubernetes secret name used for pulling the toolkit images from a private registry.
+            interval: (String) Interval at which to reconcile from bootstrap repository. Defaults to 1m0s.
+            keep_namespace: (Boolean) Keep the namespace after uninstalling Flux components. Defaults to false.
+            kustomization_override: (String) Kustomization to override configuration set by default.
+            log_level: (String) Log level for toolkit components. Defaults to info.
+            manifests_path: (String, Deprecated) The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to https://github.com/fluxcd/flux2/releases.
+            namespace: (String) The namespace scope for install manifests. Defaults to flux-system. It will be created if it does not exist.
+            network_policy: (Boolean) Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to true.
+            path: (String) Path relative to the repository root, when specified the cluster sync will be scoped to this path (immutable).
+            read: (String) A string that can be parsed as a duration consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+            recurse_submodules: (Boolean) Configures the GitRepository source to initialize and include Git submodules in the artifact it produces.
+            registry: (String) Container registry where the toolkit images are published. Defaults to ghcr.io/fluxcd.
+            registry_credentials: (String) Container registry credentials in the format 'user:password'
+            repository_files: (Map of String) Git repository files created and managed by the provider.
+            secret_name: (String) Name of the secret the sync credentials can be found in or stored to. Defaults to flux-system.
+            timeouts: (Attributes) (see below for nested schema)
+            toleration_keys: (Set of String) List of toleration keys used to schedule the components pods onto nodes with matching taints.
+            update: (String) A string that can be parsed as a duration consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+            version: (String) Flux version. Defaults to v2.6.4. Has no effect when embedded_manifests is enabled.
+            watch_all_namespaces: (Boolean) If true watch for custom resources in all namespaces. Defaults to true.
+        importStatements:
+            - terraform import flux_bootstrap_git.this flux-system

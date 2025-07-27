@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: providerconfigs.flux.upbound.io
+  name: providerconfigs.flux.flux.crossplane.io
 spec:
-  group: flux.upbound.io
+  group: flux.flux.crossplane.io
   names:
     categories:
     - crossplane
