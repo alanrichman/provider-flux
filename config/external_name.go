@@ -10,7 +10,7 @@ import "github.com/crossplane/upjet/pkg/config"
 // provider.
 var ExternalNameConfigs = map[string]config.ExternalName{
 	// flux_bootstrap_git can be imported by passing the namespace where Flux is installed
-	"flux_bootstrap_git": config.NameAsIdentifier,
+	"flux_bootstrap_git": config.IdentifierFromProvider,
 }
 
 // ExternalNameConfigurations applies all external name configs listed in the
