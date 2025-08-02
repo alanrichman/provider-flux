@@ -13,7 +13,7 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "flux.flux.crossplane.io"
+	Group   = "flux.crossplane.io"
 	Version = "v1alpha1"
 )
 

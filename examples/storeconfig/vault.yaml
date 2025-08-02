@@ -1,4 +1,4 @@
-apiVersion: flux.flux.crossplane.io/v1alpha1
+apiVersion: flux.crossplane.io/v1alpha1
 kind: StoreConfig
 metadata:
   name: vault

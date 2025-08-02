@@ -28,6 +28,7 @@ var providerMetadata string
 func GetProvider() *ujconfig.Provider {
 	pc := ujconfig.NewProvider([]byte(providerSchema), resourcePrefix, modulePath, []byte(providerMetadata),
 		ujconfig.WithRootGroup("flux.crossplane.io"),
+		ujconfig.WithShortName("flux"),
 		ujconfig.WithIncludeList(ExternalNameConfigured()),
 		ujconfig.WithFeaturesPackage("internal/features"),
 		ujconfig.WithDefaultResourceOptions(

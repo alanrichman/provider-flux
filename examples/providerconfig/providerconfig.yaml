@@ -1,4 +1,4 @@
-apiVersion: flux.flux.crossplane.io/v1beta1
+apiVersion: flux.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: default
