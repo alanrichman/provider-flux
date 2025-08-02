@@ -152,6 +152,10 @@ spec:
                     description: Name of the secret the sync credentials can be found
                       in or stored to. Defaults to `flux-system`.
                     type: string
+                  timeouts:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerationKeys:
                     description: List of toleration keys used to schedule the components
                       pods onto nodes with matching taints.
@@ -261,6 +265,10 @@ spec:
                     description: Name of the secret the sync credentials can be found
                       in or stored to. Defaults to `flux-system`.
                     type: string
+                  timeouts:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerationKeys:
                     description: List of toleration keys used to schedule the components
                       pods onto nodes with matching taints.
@@ -537,6 +545,10 @@ spec:
                     description: Name of the secret the sync credentials can be found
                       in or stored to. Defaults to `flux-system`.
                     type: string
+                  timeouts:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerationKeys:
                     description: List of toleration keys used to schedule the components
                       pods onto nodes with matching taints.

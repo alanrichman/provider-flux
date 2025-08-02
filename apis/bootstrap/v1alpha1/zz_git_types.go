@@ -74,6 +74,8 @@ type GitInitParameters struct {
 	// Name of the secret the sync credentials can be found in or stored to. Defaults to `flux-system`.
 	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
 
+	Timeouts map[string]string `json:"timeouts,omitempty" tf:"timeouts,omitempty"`
+
 	// List of toleration keys used to schedule the components pods onto nodes with matching taints.
 	// +listType=set
 	TolerationKeys []*string `json:"tolerationKeys,omitempty" tf:"toleration_keys,omitempty"`
@@ -151,6 +153,8 @@ type GitObservation struct {
 
 	// Name of the secret the sync credentials can be found in or stored to. Defaults to `flux-system`.
 	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+
+	Timeouts map[string]string `json:"timeouts,omitempty" tf:"timeouts,omitempty"`
 
 	// List of toleration keys used to schedule the components pods onto nodes with matching taints.
 	// +listType=set
@@ -242,6 +246,9 @@ type GitParameters struct {
 	// Name of the secret the sync credentials can be found in or stored to. Defaults to `flux-system`.
 	// +kubebuilder:validation:Optional
 	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Timeouts map[string]string `json:"timeouts,omitempty" tf:"timeouts,omitempty"`
 
 	// List of toleration keys used to schedule the components pods onto nodes with matching taints.
 	// +kubebuilder:validation:Optional

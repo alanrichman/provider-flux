@@ -4,13 +4,27 @@ Copyright 2022 Upbound Inc.
 
 package config
 
-import "github.com/crossplane/upjet/pkg/config"
+import (
+	"errors"
+
+	"github.com/crossplane/upjet/pkg/config"
+)
 
 // ExternalNameConfigs contains all external name configurations for this
 // provider.
 var ExternalNameConfigs = map[string]config.ExternalName{
 	// flux_bootstrap_git can be imported by passing the namespace where Flux is installed
-	"flux_bootstrap_git": config.IdentifierFromProvider,
+	"flux_bootstrap_git": {
+		SetIdentifierArgumentFn: config.NopSetIdentifierArgument,
+		GetExternalNameFn: func(tfstate map[string]any) (string, error) {
+			if id, ok := tfstate["namespace"].(string); ok && id != "" {
+				return id, nil
+			}
+			return "", errors.New("cannot find namespace in tfstate")
+		},
+		GetIDFn:                config.ExternalNameAsID,
+		DisableNameInitializer: true,
+	},
 }
 
 // ExternalNameConfigurations applies all external name configs listed in the

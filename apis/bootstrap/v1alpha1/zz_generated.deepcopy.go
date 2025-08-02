@@ -149,6 +149,13 @@ func (in *GitInitParameters) DeepCopyInto(out *GitInitParameters) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Timeouts != nil {
+		in, out := &in.Timeouts, &out.Timeouts
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.TolerationKeys != nil {
 		in, out := &in.TolerationKeys, &out.TolerationKeys
 		*out = make([]*string, len(*in))
@@ -345,6 +352,13 @@ func (in *GitObservation) DeepCopyInto(out *GitObservation) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Timeouts != nil {
+		in, out := &in.Timeouts, &out.Timeouts
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.TolerationKeys != nil {
 		in, out := &in.TolerationKeys, &out.TolerationKeys
 		*out = make([]*string, len(*in))
@@ -487,6 +501,13 @@ func (in *GitParameters) DeepCopyInto(out *GitParameters) {
 		in, out := &in.SecretName, &out.SecretName
 		*out = new(string)
 		**out = **in
+	}
+	if in.Timeouts != nil {
+		in, out := &in.Timeouts, &out.Timeouts
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	if in.TolerationKeys != nil {
 		in, out := &in.TolerationKeys, &out.TolerationKeys

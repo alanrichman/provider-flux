@@ -1,6 +1,9 @@
 package bootstrap
 
-import "github.com/crossplane/upjet/pkg/config"
+import (
+	"github.com/crossplane/upjet/pkg/config"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 // Configure configures individual resources by adding custom ResourceConfigurators.
 func Configure(p *config.Provider) {
@@ -9,10 +12,9 @@ func Configure(p *config.Provider) {
 		// this resource, which would be "flux"
 		r.ShortGroup = "bootstrap"
 
-		// Skip the timeouts field as it's a Terraform meta-argument
-		// and not part of the actual resource schema
-		r.TerraformResource.Schema["timeouts"].Computed = false
+		r.TerraformResource.Schema["secret_name"].Default = "flux-system"
+
+		r.TerraformResource.Schema["timeouts"].Type = schema.TypeMap
 		r.TerraformResource.Schema["timeouts"].Optional = true
-		delete(r.TerraformResource.Schema, "timeouts")
 	})
 }
